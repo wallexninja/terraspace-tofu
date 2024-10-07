@@ -19,9 +19,16 @@ RUN apk update && apk add --no-cache \
   libffi-dev \
   wget
 
-# Install OpenTofu (latest version)
-RUN wget -O /usr/local/bin/tofu https://github.com/opentofu/opentofu/releases/latest/download/opentofu_linux_amd64 \
-  && chmod +x /usr/local/bin/tofu
+# Download the installer script:
+RUN curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh
+
+# Give it execution permissions:
+RUN chmod +x install-opentofu.sh
+
+# Please inspect the downloaded script
+
+# Run the installer:
+RUN ./install-opentofu.sh --install-method apk
 
 # Install Bundler and Terraspace
 RUN gem install bundler --no-document \
