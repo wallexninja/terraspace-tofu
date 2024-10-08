@@ -19,20 +19,22 @@ RUN apk update && apk add --no-cache \
   libffi-dev \
   wget
 
-# Download the installer script:
+# Install Tofu
 RUN curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh
-
-# Give it execution permissions:
 RUN chmod +x install-opentofu.sh
-
-# Please inspect the downloaded script
-
-# Run the installer:
 RUN ./install-opentofu.sh --install-method apk
 
 # Install Bundler and Terraspace
 RUN gem install bundler --no-document \
   && gem install terraspace --no-document
+
+# Create a symbolic link for terraspace to ensure the Ruby environment is used
+RUN ln -s /usr/bin/ruby /usr/local/bin/terraspace-ruby
+
+# Use `terraspace-ruby` to execute terraspace as a Ruby script
+RUN echo '#!/usr/bin/env terraspace-ruby' > /usr/local/bin/terraspace \
+  && echo 'exec ruby $(which terraspace) "$@"' >> /usr/local/bin/terraspace \
+  && chmod +x /usr/local/bin/terraspace
 
 # Verify installations
 RUN terraspace version && tofu version
