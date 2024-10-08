@@ -28,14 +28,6 @@ RUN ./install-opentofu.sh --install-method apk
 RUN gem install bundler --no-document \
   && gem install terraspace --no-document
 
-# Create a symbolic link for terraspace to ensure the Ruby environment is used
-RUN ln -s /usr/bin/ruby /usr/local/bin/terraspace-ruby
-
-# Use `terraspace-ruby` to execute terraspace as a Ruby script
-RUN echo '#!/usr/bin/env terraspace-ruby' > /usr/local/bin/terraspace \
-  && echo 'exec ruby $(which terraspace) "$@"' >> /usr/local/bin/terraspace \
-  && chmod +x /usr/local/bin/terraspace
-
 # Verify installations
 RUN terraspace version && tofu version
 
