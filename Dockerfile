@@ -1,35 +1,15 @@
-# Use Alpine Slim as the base image for a lightweight build
-FROM alpine:3.18.4
+FROM ruby:3.0.3-alpine3.15
 
-# Set environment variables
-ENV TERRASPACE_VERSION=latest \
-  TOFU_VERSION=latest
+RUN apk add ruby-unf_ext cmake build-base git terraform aws-cli
 
-# Install required dependencies for Terraspace and OpenTofu
-RUN apk update && apk add --no-cache \
-  bash \
-  curl \
-  git \
-  unzip \
-  build-base \
-  ruby \
-  ruby-dev \
-  libc6-compat \
-  openssl-dev \
-  libffi-dev \
-  wget
+WORKDIR /tmp
+ARG PACKAGE_VERSION=latest
+COPY bin/install/terraspace/gem.sh bin/install/terraspace/gem.sh
 
-# Install Tofu
 RUN curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh
 RUN chmod +x install-opentofu.sh
 RUN ./install-opentofu.sh --install-method apk
 
-# Install Bundler and Terraspace
-RUN gem install bundler --no-document \
-  && gem install terraspace --no-document
+RUN bin/install/terraspace/gem.sh
 
-# Verify installations
-RUN terraspace version && tofu version
-
-# Set the entrypoint for the Docker container
-ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT ["/bin/sh"]
